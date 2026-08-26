@@ -1,0 +1,24 @@
+appId: com.unideva.unitasarim
+productName: UNI Tasarım
+directories:
+  buildResources: build
+  output: release
+files:
+  - out/**
+  - package.json
+asarUnpack:
+  # Ana süreç, XSLT derleyicisini ELECTRON_RUN_AS_NODE (saf Node) ile çalıştırır;
+  # saf Node asar okuyamadığı için production bağımlılıklarının tamamı açılır.
+  - node_modules/**
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  artifactName: ${productName}-Kurulum-${version}.${ext}
+  shortcutName: UNI Tasarım

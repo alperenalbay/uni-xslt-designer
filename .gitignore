@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+out/
+dist/
+release/
+build/*.manifest
+*.tsbuildinfo
+
+# Electron
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test
+coverage/
+test-results/
+playwright-report/
+test-results.xml
+.last-run.json
+
+# Cache
+.cache/
+.parcel-cache/
+.vite/
+
+# Temp
+tmp/
+temp/
+
+# Large binaries (NSIS installers never commit)
+*.exe
+*.blockmap
+*.dmg
+*.AppImage
+*.snap
+
+# Keep build resources but ignore generated release
+!build/icon.png
+!build/*.ps1
