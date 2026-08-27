@@ -16,6 +16,8 @@ export function TemplatePickerModal(): React.JSX.Element | null {
     const tpl = BUILT_IN_TEMPLATES[type].find((t) => t.id === templateId)
     if (!tpl) return
     useEditorStore.getState().loadDocument(picker.xml, tpl.xslt, type)
+    // loadDocument zaten uiStore'u senkronlar ama hızlı geri bildirim için açıkça da set edelim
+    useUiStore.getState().setDocType(type)
     useToastStore.getState().push(`"${picker.name}" ${tpl.name} şablonuyla açıldı.`)
     close()
   }

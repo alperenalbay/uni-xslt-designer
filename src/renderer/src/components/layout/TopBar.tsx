@@ -10,7 +10,7 @@ import {
   Undo2
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { DOC_TYPE_LABELS, type DocType, useUiStore } from '@/store/uiStore'
+import { DOC_TYPE_LABELS, useUiStore } from '@/store/uiStore'
 import { IconButton } from '@/components/common/IconButton'
 import { printPreview, usePreviewStore } from '@/store/previewStore'
 import { redoEditor, undoEditor, useEditorStore } from '@/store/editorStore'
@@ -23,13 +23,14 @@ import {
 import { detectDocTypeFromXml } from '@/core/docTypes'
 import { extractEmbeddedXslt } from '@/core/embeddedXslt'
 
-const DOC_TYPES: DocType[] = ['fatura', 'arsiv', 'irsaliye']
-
 export function TopBar(): React.JSX.Element {
   const theme = useUiStore((s) => s.theme)
   const toggleTheme = useUiStore((s) => s.toggleTheme)
-  const docType = useUiStore((s) => s.docType)
+  const uiDocType = useUiStore((s) => s.docType)
   const hasDocument = useEditorStore((s) => s.hasDocument)
+  const editorDocType = useEditorStore((s) => s.docType)
+  // Belge açıkken gerçek kaynak editorStore'dur; kapalıyken uiStore bir sonraki şablon için seçimi tutar
+  const docType = hasDocument ? editorDocType : uiDocType
 
   // zundo geçmişine reaktif abonelik
   const [, force] = useState(0)
@@ -117,11 +118,6 @@ export function TopBar(): React.JSX.Element {
     }
   }
 
-  function handleDocType(type: DocType): void {
-    goHome()
-    useUiStore.getState().setDocType(type)
-  }
-
   return (
     <header className="relative z-10 flex h-12 shrink-0 items-center gap-3 border-b border-edge bg-panel px-3">
       <button
@@ -136,19 +132,6 @@ export function TopBar(): React.JSX.Element {
           v0.3.4
         </span>
       </button>
-
-      <div className="absolute left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-lg border border-edge bg-panel-2 p-[3px]">
-        {DOC_TYPES.map((type) => (
-          <button
-            key={type}
-            type="button"
-            onClick={() => handleDocType(type)}
-            className={`seg-btn ${docType === type ? 'is-active' : ''}`}
-          >
-            {DOC_TYPE_LABELS[type]}
-          </button>
-        ))}
-      </div>
 
       <div className="ml-auto flex items-center gap-0.5">
         <IconButton icon={FilePlus2} label="Dosya Aç (XML) (Ctrl+O)" onClick={openXmlFlow} />

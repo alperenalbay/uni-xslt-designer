@@ -3,46 +3,83 @@ import type { DocType } from '@/store/uiStore'
 export type DetectedDocType = DocType | 'bilinmiyor'
 
 const DESPATCH_HINTS = [
-  'DespatchAdvice',
-  'DespatchLine',
-  'DespatchSupplierParty',
-  'DeliveryCustomerParty',
-  'ActualDespatchDate',
-  'ShipmentStage'
+  'despatchadvice',
+  'despatchline',
+  'despatchsupplierparty',
+  'deliverycustomerparty',
+  'actualdespatchdate',
+  'shipmentstage'
 ]
 
-const ARCHIVE_PROFILE_HINTS = ['EARSIVFATURA', 'E_ARSIV', 'EARŞİV']
+const ARCHIVE_PROFILE_HINTS = ['EARSIVFATURA', 'E_ARSIV', 'EARŞİV', 'E-ARSIV']
+const IRSALIYE_PROFILE_HINTS = ['TEMELIRSALIYE', 'IRSALIYE', 'IRSALIYE', 'DESPATCH']
+
+function stripBom(s: string): string {
+  return s.charCodeAt(0) === 0xfeff ? s.slice(1) : s
+}
 
 /**
- * XML içeriğinden belge türünü algılar.
+ * XML içeriğinden belge türünü algılar — DOMParser öncelikli, string fallback.
  * - Kök eleman DespatchAdvice ise e-İrsaliye
  * - Invoice + EARSIVFATURA profili ise e-Arşiv
  * - Invoice ise e-Fatura
+ * - ProfileID içinde IRSALIYE geçiyorsa e-İrsaliye (hatalı kök durumunu kurtarır)
  */
 export function detectDocTypeFromXml(xml: string): DetectedDocType {
-  if (!xml.trim()) return 'bilinmiyor'
+  const raw = stripBom(xml)
+  if (!raw.trim()) return 'bilinmiyor'
 
-  const head = xml.slice(0, 4000)
-  if (DESPATCH_HINTS.some((h) => head.includes(h))) return 'irsaliye'
-  if (/<\s*DespatchAdvice[\s>]/.test(xml)) return 'irsaliye'
-  if (!/<\s*Invoice[\s>]/.test(xml)) return 'bilinmiyor'
+  // 1) DOMParser ile kök eleman tespiti — en güvenilir
+  try {
+    const doc = new DOMParser().parseFromString(raw, 'application/xml')
+    const parserErr = doc.getElementsByTagName('parsererror')[0]
+    if (!parserErr && doc.documentElement) {
+      const local = (doc.documentElement.localName ?? doc.documentElement.tagName).toLowerCase()
+      if (local === 'despatchadvice') return 'irsaliye'
+      if (local === 'invoice') {
+        const profileEl =
+          doc.getElementsByTagName('cbc:ProfileID')[0] ?? doc.getElementsByTagName('ProfileID')[0]
+        const profile = (profileEl?.textContent ?? '').toUpperCase()
+        if (profile) {
+          if (IRSALIYE_PROFILE_HINTS.some((h) => profile.includes(h))) return 'irsaliye'
+          if (ARCHIVE_PROFILE_HINTS.some((h) => profile.includes(h))) return 'arsiv'
+        }
+        return 'fatura'
+      }
+      // Bilinmeyen kök — despatch ipuçları var mı diye devam et
+    }
+  } catch {
+    /* DOMParser hatası -> string fallback */
+  }
 
-  const profileMatch = xml.match(/<\s*(?:cbc:)?ProfileID\s*>([^<]*)</)
+  const lower = raw.toLowerCase()
+  // İrsaliye ipuçları — case-insensitive, tüm dokümanda ara
+  if (DESPATCH_HINTS.some((h) => lower.includes(h))) return 'irsaliye'
+  if (/<\s*despatchadvice[\s>]/i.test(raw)) return 'irsaliye'
+
+  const profileMatch = raw.match(/<\s*(?:cbc:)?ProfileID\s*>([^<]*)</i)
   const profile = (profileMatch?.[1] ?? '').toUpperCase()
-  if (ARCHIVE_PROFILE_HINTS.some((h) => profile.includes(h))) return 'arsiv'
+  if (profile) {
+    if (IRSALIYE_PROFILE_HINTS.some((h) => profile.includes(h))) return 'irsaliye'
+    if (ARCHIVE_PROFILE_HINTS.some((h) => profile.includes(h))) return 'arsiv'
+  }
 
-  return 'fatura'
+  if (/<\s*invoice[\s>]/i.test(raw)) return 'fatura'
+
+  return 'bilinmiyor'
 }
 
-/** XSLT şablonunun hedeflediği belge türünü tahmin eder. */
+/** XSLT şablonunun hedeflediği belge türünü tahmin eder — case-insensitive. */
 export function detectDocTypeFromXslt(xslt: string): DetectedDocType {
-  if (!xslt.trim()) return 'bilinmiyor'
-  if (DESPATCH_HINTS.some((h) => xslt.includes(h))) return 'irsaliye'
+  const raw = stripBom(xslt)
+  if (!raw.trim()) return 'bilinmiyor'
+  const lower = raw.toLowerCase()
+  if (DESPATCH_HINTS.some((h) => lower.includes(h))) return 'irsaliye'
 
-  const archiveHints = ['EARSIVFATURA', 'e-Arşiv', 'E-Arşiv']
-  if (archiveHints.some((h) => xslt.includes(h))) return 'arsiv'
+  const archiveHints = ['earsivfatura', 'e-arşiv', 'e-arsiv']
+  if (archiveHints.some((h) => lower.includes(h))) return 'arsiv'
 
-  if (/Invoice|FATURA No|Fatura No/i.test(xslt)) return 'fatura'
+  if (/invoice|fatura no/i.test(raw)) return 'fatura'
 
   return 'bilinmiyor'
 }

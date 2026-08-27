@@ -73,7 +73,10 @@ const PALETTE: PaletteItem[] = [
 export function LeftRail(): React.JSX.Element {
   const leftTab = useUiStore((s) => s.leftTab)
   const setLeftTab = useUiStore((s) => s.setLeftTab)
-  const docType = useUiStore((s) => s.docType)
+  const uiDocType = useUiStore((s) => s.docType)
+  const hasDocument = useEditorStore((s) => s.hasDocument)
+  const editorDocType = useEditorStore((s) => s.docType)
+  const docType = hasDocument ? editorDocType : uiDocType
   const [userTpls, setUserTpls] = useState<UserTemplate[]>([])
   const [saveName, setSaveName] = useState('')
 

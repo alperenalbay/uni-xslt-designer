@@ -1,8 +1,12 @@
 import { DOC_TYPE_LABELS, useUiStore } from '@/store/uiStore'
+import { useEditorStore } from '@/store/editorStore'
 import { usePreviewStore } from '@/store/previewStore'
 
 export function StatusBar(): React.JSX.Element {
-  const docType = useUiStore((s) => s.docType)
+  const uiDocType = useUiStore((s) => s.docType)
+  const hasDocument = useEditorStore((s) => s.hasDocument)
+  const editorDocType = useEditorStore((s) => s.docType)
+  const docType = hasDocument ? editorDocType : uiDocType
   const issues = usePreviewStore((s) => s.issues)
   const html = usePreviewStore((s) => s.html)
   const busy = usePreviewStore((s) => s.busy)

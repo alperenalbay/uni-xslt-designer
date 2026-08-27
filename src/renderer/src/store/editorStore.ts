@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { temporal } from 'zundo'
 import type { DocType } from './uiStore'
+import { useUiStore } from './uiStore'
 
 export interface EditorState {
   xml: string
@@ -29,8 +30,11 @@ export const useEditorStore = create<EditorState>()(
       hasDocument: false,
       docType: 'fatura',
       selectedXsltId: null,
-      loadDocument: (xml, xslt, docType) =>
-        set({ xml, xslt, docType, hasDocument: true, selectedXsltId: null }),
+      loadDocument: (xml, xslt, docType) => {
+        set({ xml, xslt, docType, hasDocument: true, selectedXsltId: null })
+        // uiStore ile tek kaynak: açık belge türü her zaman senkron kalsın
+        useUiStore.getState().setDocType(docType)
+      },
       closeDocument: () => set({ xml: '', xslt: '', hasDocument: false, selectedXsltId: null }),
       setXml: (xml) => set({ xml }),
       setXslt: (xslt) => set({ xslt }),
