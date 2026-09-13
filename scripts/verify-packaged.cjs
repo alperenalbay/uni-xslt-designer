@@ -1,9 +1,13 @@
 // Paketlenmiş uygulamayı gerçekten çalıştırıp yeni akışı doğrular
 const { _electron: electron } = require('playwright')
 const path = require('node:path')
+const mode = process.argv[2] === 'linux' ? 'linux' : 'win'
+const version = require('../package.json').version
+const exe = mode === 'linux'
+  ? path.join(__dirname, '..', 'release', 'linux-unpacked', 'uni-xslt-designer')
+  : path.join(__dirname, '..', 'release', 'win-unpacked', 'UNI Tasarım.exe')
 
 async function main() {
-  const exe = path.join(__dirname, '..', 'release', 'win-unpacked', 'UNI Tasarım.exe')
   console.log('Paket başlatılıyor:', exe)
   const app = await electron.launch({ executablePath: exe, timeout: 30000 })
   try {
@@ -11,8 +15,8 @@ async function main() {
     await win.waitForLoadState('domcontentloaded')
 
     // 1) Sürüm rozeti yeni mi?
-    await win.waitForSelector('text=v0.3.4', { timeout: 15000 })
-    console.log('✓ Sürüm rozeti v0.3.4')
+    await win.waitForSelector(`text=v${version}`, { timeout: 15000 })
+    console.log(`✓ Sürüm rozeti v${version}`)
 
     // 2) Ana süreçte yeni motor handler'ı var mı? (handle → _invokeHandlers map'i)
     const hasRender = await app.evaluate(({ ipcMain }) => {
@@ -27,7 +31,8 @@ async function main() {
 
     // 4) Şablon yükle → motorla dönüşüm (paket içinde!)
     const card = win.locator('section').filter({ hasText: 'e-Fatura' }).first()
-    await card.getByText('Kurumsal', { exact: true }).click()
+    await card.getByText('Şablonları Gör').click()
+    await win.locator('button.template-row').filter({ hasText: 'Kurumsal' }).first().click()
     const frame = win.frameLocator('#preview-frame')
     await frame.locator('.doc-title').waitFor({ timeout: 30000 })
     await frame.getByText('DEVATEK TEKNOLOJİ A.Ş.').waitFor({ timeout: 10000 })
