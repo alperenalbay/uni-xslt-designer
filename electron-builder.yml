@@ -22,3 +22,10 @@ nsis:
   createDesktopShortcut: always
   artifactName: ${productName}-Kurulum-${version}.${ext}
   shortcutName: UNI Tasarım
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  artifactName: ${productName}-Kurulum-${version}.${ext}
+  category: Office
