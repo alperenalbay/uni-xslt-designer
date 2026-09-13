@@ -129,7 +129,7 @@ export function TopBar(): React.JSX.Element {
         <span className="block h-3.5 w-3.5 rotate-45 rounded-[3px] bg-accent shadow-[0_0_12px_var(--at-accent)]" />
         <span className="text-[13px] font-bold tracking-tight">UNI Tasarım</span>
         <span className="rounded bg-panel-2 px-1.5 py-0.5 font-mono text-[9px] text-secondary">
-          v0.3.4
+          v0.4.0
         </span>
       </button>
 
