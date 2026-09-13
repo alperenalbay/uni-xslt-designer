@@ -73,7 +73,9 @@ export function detectDocTypeFromXml(xml: string): DetectedDocType {
 export function detectDocTypeFromXslt(xslt: string): DetectedDocType {
   const raw = stripBom(xslt)
   if (!raw.trim()) return 'bilinmiyor'
-  const lower = raw.toLowerCase()
+  // 'İ'.toLowerCase() → 'i̇' (i + birleşen nokta) olur ve 'e-arşiv' ipucunu kaçırır;
+  // normalize et ki 'E-ARŞİV' başlıklı şablonlar e-Arşiv tanınsın.
+  const lower = raw.toLowerCase().replace(/i̇/g, 'i')
   if (DESPATCH_HINTS.some((h) => lower.includes(h))) return 'irsaliye'
 
   const archiveHints = ['earsivfatura', 'e-arşiv', 'e-arsiv']
