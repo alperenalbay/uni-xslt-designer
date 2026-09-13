@@ -12,7 +12,7 @@ const DESPATCH_HINTS = [
 ]
 
 const ARCHIVE_PROFILE_HINTS = ['EARSIVFATURA', 'E_ARSIV', 'EARŞİV', 'E-ARSIV']
-const IRSALIYE_PROFILE_HINTS = ['TEMELIRSALIYE', 'IRSALIYE', 'IRSALIYE', 'DESPATCH']
+const IRSALIYE_PROFILE_HINTS = ['TEMELIRSALIYE', 'IRSALIYE', 'DESPATCH']
 
 function stripBom(s: string): string {
   return s.charCodeAt(0) === 0xfeff ? s.slice(1) : s
