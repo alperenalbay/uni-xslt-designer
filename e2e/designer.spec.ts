@@ -3,7 +3,8 @@ import { expect, test } from '@playwright/test'
 async function loadKurumsalFatura(page: import('@playwright/test').Page): Promise<void> {
   await page.goto('/')
   const card = page.locator('section').filter({ hasText: 'e-Fatura' }).first()
-  await card.getByText('Kurumsal', { exact: true }).click()
+  await card.getByText('Şablonları Gör').click()
+  await page.locator('button.template-row').filter({ hasText: 'Kurumsal' }).first().click()
   await expect(page.frameLocator('#preview-frame').locator('.doc-title')).toBeVisible()
 }
 
@@ -134,17 +135,23 @@ test('Logo ile ana ekrana doner ve tur sekmesi ana sayfayi yonlendirir', async (
   await expect(page.getByRole('heading', { name: 'Ne tasarlamak istersiniz?' })).toBeVisible()
 
   const faturaCard = page.locator('section').filter({ hasText: 'e-Fatura' }).first()
-  await faturaCard.getByText('Kurumsal', { exact: true }).click()
+  await faturaCard.getByText('Şablonları Gör').click()
+  await page.locator('button.template-row').filter({ hasText: 'Kurumsal' }).first().click()
   await expect(page.frameLocator('#preview-frame').locator('.doc-title')).toBeVisible({ timeout: 15000 })
 
-  await page.getByRole('button', { name: 'e-İrsaliye', exact: true }).click()
+  await page.getByTitle('Ana ekran / Yeni Belge').click()
   await expect(page.getByRole('heading', { name: 'Ne tasarlamak istersiniz?' })).toBeVisible()
+
+  const irsaliyeCard = page.locator('section').filter({ hasText: 'e-İrsaliye' })
+  await irsaliyeCard.getByText('Şablonları Gör').click()
+  await expect(page.getByRole('heading', { name: 'e-İrsaliye — Şablon Seç' })).toBeVisible()
 })
 
 test('paletten eklenen metin kutusu Alt olmadan suruklenerek tasinir', async ({ page }) => {
   await page.goto('/')
   const card = page.locator('section').filter({ hasText: 'e-Fatura' }).first()
-  await card.getByText('Kurumsal', { exact: true }).click()
+  await card.getByText('Şablonları Gör').click()
+  await page.locator('button.template-row').filter({ hasText: 'Kurumsal' }).first().click()
   const frame = page.frameLocator('#preview-frame')
   await expect(frame.locator('.doc-title')).toBeVisible()
 

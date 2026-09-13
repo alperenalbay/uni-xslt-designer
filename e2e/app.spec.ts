@@ -14,7 +14,8 @@ test('e-Fatura kurumsal şablon canlı önizlemede dönüştürülür', async ({
 
   await page.goto('/')
   const faturaCard = page.locator('section').filter({ hasText: 'e-Fatura' }).first()
-  await faturaCard.getByText('Kurumsal', { exact: true }).click()
+  await faturaCard.getByText('Şablonları Gör').click()
+  await page.locator('button.template-row').filter({ hasText: 'Kurumsal' }).first().click()
 
   const frame = page.frameLocator('#preview-frame')
   await expect(frame.locator('.doc-title')).toContainText('E-FATURA', { ignoreCase: true })
@@ -31,7 +32,8 @@ test('e-Fatura kurumsal şablon canlı önizlemede dönüştürülür', async ({
 test('e-İrsaliye kurumsal şablon çalışır', async ({ page }) => {
   await page.goto('/')
   const irsaliyeCard = page.locator('section').filter({ hasText: 'e-İrsaliye' })
-  await irsaliyeCard.getByText('Kurumsal', { exact: true }).click()
+  await irsaliyeCard.getByText('Şablonları Gör').click()
+  await page.locator('button.template-row').filter({ hasText: 'Kurumsal' }).first().click()
 
   const frame = page.frameLocator('#preview-frame')
   await expect(frame.locator('.doc-title')).toContainText('E-İRSALİYE', { ignoreCase: true })
@@ -42,7 +44,8 @@ test('e-İrsaliye kurumsal şablon çalışır', async ({ page }) => {
 test('e-Arşiv sade şablon çalışır', async ({ page }) => {
   await page.goto('/')
   const arsivCard = page.locator('section').filter({ hasText: 'e-Arşiv' })
-  await arsivCard.getByText('Sade', { exact: true }).click()
+  await arsivCard.getByText('Şablonları Gör').click()
+  await page.locator('button.template-row').filter({ hasText: 'Sade' }).first().click()
 
   const frame = page.frameLocator('#preview-frame')
   await expect(frame.locator('h1')).toContainText('Arşiv', { ignoreCase: true })
